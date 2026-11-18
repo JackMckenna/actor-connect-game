@@ -5,7 +5,7 @@ import { cleanRoomCode } from '~/utils/net'
 const game = useGame()
 const {
   status, phase, demo, start, target, chain, selectedFilm, listLoading, error, feedback, choices,
-  misses, hints, best, newBest, players, myId, myName, roomCode, current, links, potentialScore,
+  misses, hints, best, newBest, players, par, myId, myName, roomCode, current, links, potentialScore,
   deadEnd, multiplayer, isHost, currentPlayer, isMyTurn, shareLink,
 } = game
 
@@ -221,6 +221,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
         :new-best="newBest"
         :hints="hints"
         :misses="misses"
+        :par="par"
         :players="multiplayer ? players : []"
         :can-replay="!multiplayer || isHost"
         @again="game.newGame()"

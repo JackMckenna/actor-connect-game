@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Player } from '#shared/types/game'
 import type { ChainLink } from '~/composables/useGame'
+import type { Par } from '~/utils/solver'
 
 const props = defineProps<{
   chain: ChainLink[]
@@ -8,6 +9,8 @@ const props = defineProps<{
   newBest: boolean
   hints: number
   misses: number
+  /** Shortest possible route (null while still being worked out) */
+  par: Par | null
   /** Co-op team (empty in solo) */
   players: Player[]
   /** Guests wait for the host to deal the next pair */
@@ -18,6 +21,17 @@ defineEmits<{ again: [], title: [] }>()
 const links = computed(() => props.chain.length - 1)
 const score = computed(() => scoreFor(links.value, props.hints))
 const rank = computed(() => rankFor(links.value))
+
+/** How your chain compares with the shortest one we could find */
+const verdict = computed(() => {
+  const p = props.par
+  if (!p) return 'checking'
+  if (p.links == null) return links.value <= 3 ? 'beat' : 'unknown'
+  if (links.value < p.links) return 'beat'
+  if (links.value === p.links) return 'perfect'
+  return 'longer'
+})
+const filmsWord = (n: number) => `${n} FILM${n === 1 ? '' : 'S'}`
 
 // Count the score up arcade-style
 const shownScore = ref(0)
@@ -65,6 +79,33 @@ async function share() {
       <span class="win__label">{{ links }} FILM{{ links === 1 ? '' : 'S' }} · {{ hints }} HINT{{ hints === 1 ? '' : 'S' }} · {{ misses }} MISS{{ misses === 1 ? '' : 'ES' }}</span>
       <span v-if="!players.length" class="win__label">BEST {{ String(best).padStart(4, '0') }}</span>
       <span v-if="newBest" class="win__new blink">NEW HIGH SCORE!</span>
+    </div>
+
+    <div class="win__par" :class="`win__par--${verdict}`">
+      <template v-if="verdict === 'checking'">
+        <span class="win__label">WORKING OUT THE SHORTEST ROUTE<span class="blink">_</span></span>
+      </template>
+      <template v-else-if="verdict === 'perfect'">
+        <strong>★ PERFECT ROUTE! ★</strong>
+        <span class="win__label">{{ filmsWord(links) }} IS THE SHORTEST POSSIBLE</span>
+      </template>
+      <template v-else-if="verdict === 'beat'">
+        <strong>★ GENIUS! ★</strong>
+        <span class="win__label">YOU FOUND A SHORTER ROUTE THAN THE COMPUTER</span>
+      </template>
+      <template v-else-if="verdict === 'unknown'">
+        <strong>TOUGH PAIR!</strong>
+        <span class="win__label">NO ROUTE OF 3 FILMS OR FEWER FOUND</span>
+      </template>
+      <template v-else-if="par">
+        <strong>COULD BE DONE IN {{ filmsWord(par.links!) }}</strong>
+        <span class="win__par-route">
+          <template v-for="(step, i) in par.route" :key="i">
+            <span v-if="step.film" class="win__film">→ 🎬 {{ step.film.title }} <small>({{ step.film.year }})</small> →</span>
+            <span class="win__par-actor">{{ step.actor.name }}</span>
+          </template>
+        </span>
+      </template>
     </div>
 
     <ol class="win__chain">
@@ -163,6 +204,45 @@ async function share() {
     font-family: var(--font-pixel);
     font-size: 11px;
     color: var(--pink);
+  }
+
+  &__par {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 24px;
+    padding: 14px;
+    border: 3px dashed var(--muted);
+
+    strong {
+      font-family: var(--font-pixel);
+      font-size: 12px;
+      line-height: 1.6;
+      color: var(--cyan);
+    }
+
+    &--perfect, &--beat {
+      border-style: solid;
+      border-color: var(--green);
+      strong { color: var(--green); }
+    }
+    &--unknown strong { color: var(--orange); }
+  }
+
+  &__par-route {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    font-size: 20px;
+  }
+
+  &__par-actor {
+    padding: 2px 8px;
+    border: 2px solid var(--cyan);
+    color: var(--cyan);
   }
 
   &__chain {

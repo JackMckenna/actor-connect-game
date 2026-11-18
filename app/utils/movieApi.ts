@@ -98,11 +98,12 @@ export function personMovies(id: number): Promise<Film[]> {
   return cached(`movies:${id}`, async () => {
     const data = await tmdb<{ cast: TmdbMovieCredit[] }>(`/person/${id}/movie_credits`)
     const seen = new Set<number>()
+    const today = new Date().toISOString().slice(0, 10)
     return data.cast
       .filter((m) => {
         if (seen.has(m.id)) return false
         seen.add(m.id)
-        return !m.genre_ids.includes(DOCUMENTARY) && !m.video && !!m.release_date
+        return !m.genre_ids.includes(DOCUMENTARY) && !m.video && !!m.release_date && m.release_date <= today
       })
       .sort((a, b) => b.popularity - a.popularity)
       .map(m => ({

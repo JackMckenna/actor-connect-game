@@ -1,5 +1,6 @@
 import type { Actor, Film, Player } from '#shared/types/game'
 import type { GuestHandle, HostHandle } from '~/utils/net'
+import type { Par } from '~/utils/solver'
 
 export interface ChainLink {
   actor: Actor
@@ -42,6 +43,7 @@ interface SyncedState {
   hints: number
   players: Player[]
   turn: number
+  par: Par | null
 }
 
 /** What a player can do – in multiplayer these travel guest → host */
@@ -86,6 +88,8 @@ const pickRandom = <T>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)]
 let host: HostHandle | null = null
 let guest: GuestHandle | null = null
 let feedbackN = 0
+/** Bumps each new pair, so a slow route search for an old pair is ignored */
+let roundId = 0
 
 export function useGame() {
   /* ---------- synced game state ---------- */
@@ -105,6 +109,8 @@ export function useGame() {
   const hints = useState('hints', () => 0)
   const players = useState<Player[]>('players', () => [])
   const turn = useState('turn', () => 0)
+  /** Shortest possible route for this pair (null while it's still being worked out) */
+  const par = useState<Par | null>('par', () => null)
   /** Guests can't compute this (they don't hold the answer lists), so the host sends it */
   const syncedDeadEnd = useState('syncedDeadEnd', () => false)
 
@@ -157,6 +163,7 @@ export function useGame() {
       hints: hints.value,
       players: players.value,
       turn: turn.value,
+      par: par.value,
     }
   }
 
@@ -177,6 +184,7 @@ export function useGame() {
     hints.value = s.hints
     players.value = s.players
     turn.value = s.turn
+    par.value = s.par ?? null
   }
 
   let broadcastQueued = false
@@ -253,6 +261,8 @@ export function useGame() {
     misses.value = 0
     hints.value = 0
     turn.value = 0
+    par.value = null
+    const round = ++roundId
     sync()
     try {
       const res = await newPair()
@@ -261,6 +271,14 @@ export function useGame() {
       demo.value = res.demo
       chain.value = [{ actor: res.start }]
       status.value = 'playing'
+      // Work out the shortest route in the background, for the win screen
+      shortestRoute(res.start, res.target)
+        .catch((): Par => ({ links: null, route: [] }))
+        .then((p) => {
+          if (round !== roundId) return
+          par.value = p
+          sync()
+        })
       await loadFilms()
     }
     catch (e: any) {
@@ -579,7 +597,7 @@ export function useGame() {
   return {
     // state
     status, phase, demo, start, target, chain, selectedFilm, listLoading, error, feedback, choices,
-    misses, hints, best, newBest, players, turn, mode, myId, myName, roomCode,
+    misses, hints, best, newBest, players, turn, par, mode, myId, myName, roomCode,
     // derived
     current, links, potentialScore, deadEnd, multiplayer, isHost, currentPlayer, isMyTurn, shareLink,
     // actions
