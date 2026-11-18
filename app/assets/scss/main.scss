@@ -1,0 +1,133 @@
+:root {
+  --bg: #1a1033;
+  --bg-2: #24164a;
+  --panel: #2c1d5c;
+  --white: #fff8ec;
+  --muted: #a99bd6;
+  --pink: #ff3cac;
+  --cyan: #2bd9fe;
+  --yellow: #ffe14d;
+  --green: #3dff8b;
+  --orange: #ff8a3d;
+  --purple: #7b3cff;
+
+  --font-pixel: 'Press Start 2P', monospace;
+  --font-body: 'VT323', monospace;
+
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background-color: var(--bg);
+  // Chunky pixel grid + subtle scanlines
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.18) 50%, transparent 50%),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    radial-gradient(ellipse at top, var(--bg-2), var(--bg) 70%);
+  background-size: 100% 4px, 32px 32px, 32px 32px, 100% 100%;
+  background-attachment: fixed;
+  color: var(--white);
+  font-family: var(--font-body);
+  font-size: 22px;
+  -webkit-font-smoothing: none;
+}
+
+::selection {
+  background: var(--pink);
+  color: #000;
+}
+
+.panel {
+  padding: 20px;
+  background: var(--panel);
+  border: 4px solid var(--white);
+  box-shadow: 8px 8px 0 #000;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  --btn: var(--cyan);
+  display: inline-block;
+  padding: 14px 18px;
+  background: var(--btn);
+  color: #000;
+  border: 4px solid #000;
+  box-shadow: inset -4px -4px 0 rgba(0, 0, 0, 0.3), inset 4px 4px 0 rgba(255, 255, 255, 0.4), 4px 4px 0 #000;
+  font-family: var(--font-pixel);
+  font-size: 12px;
+  cursor: pointer;
+  text-transform: uppercase;
+  user-select: none;
+
+  &:hover:not(:disabled) {
+    filter: brightness(1.1);
+    transform: translate(-1px, -1px);
+    box-shadow: inset -4px -4px 0 rgba(0, 0, 0, 0.3), inset 4px 4px 0 rgba(255, 255, 255, 0.4), 5px 5px 0 #000;
+  }
+
+  &:active:not(:disabled) {
+    transform: translate(3px, 3px);
+    box-shadow: inset 4px 4px 0 rgba(0, 0, 0, 0.3), 1px 1px 0 #000;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: 3px dashed var(--yellow);
+    outline-offset: 4px;
+  }
+
+  &--pink { --btn: var(--pink); }
+  &--ghost { --btn: var(--muted); }
+  &--yellow { --btn: var(--yellow); }
+  &--small { padding: 8px 10px; font-size: 9px; }
+  &--big {
+    padding: 20px 32px;
+    font-size: clamp(14px, 3vw, 20px);
+    animation: pulse 1s steps(2) infinite;
+  }
+}
+
+/* ---------- Utilities ---------- */
+.c-cyan { color: var(--cyan); }
+.c-pink { color: var(--pink); }
+.c-yellow { color: var(--yellow); }
+.c-green { color: var(--green); }
+.c-orange { color: var(--orange); }
+
+b { font-weight: 400; }
+
+.blink { animation: blink 1s steps(1) infinite; }
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+@keyframes pulse {
+  50% { transform: scale(1.04); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
