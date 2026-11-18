@@ -2,7 +2,8 @@
 
 A bright, pixel-art web game: you get two random actors, a **START** and a **TARGET**.
 **Type** a film the current actor was in, then **type** a co-star from that film to jump to them.
-Keep going until you reach the target. **Fewer films = higher score.**
+Keep going until you reach the target. As soon as you name a film the target was in, the chain
+**connects automatically**. **Fewer films = higher score.**
 
 - Typos, accents, punctuation and a leading "The" are forgiven ("dark night" → The Dark Knight).
 - Add a year to pick between remakes: `Ocean's Eleven 2001`.
@@ -26,8 +27,9 @@ so every chain needs at least one actor in the middle (minimum 2 films).
 ## Co-op multiplayer
 
 Click **HOST A CO-OP GAME**, send the invite link (`…/actor-connect-game/?room=K7QX2`) to friends,
-and build **one chain together**, taking turns. Each correct film or co-star passes the turn on;
-wrong guesses keep the turn, and **PASS** hands it over if you're stuck. Friends can join mid-game.
+and build **one chain together**, taking turns. A turn is **a film plus a co-star from it**; once your
+co-star lands, the turn passes on. Wrong guesses keep the turn, and **PASS** hands it over if you're stuck.
+Friends can join mid-game.
 
 Players talk through a free public MQTT message broker (HiveMQ, with EMQX as a fallback) over secure
 WebSockets, so it works across home wi-fi, mobile data and most work networks with no backend or accounts.

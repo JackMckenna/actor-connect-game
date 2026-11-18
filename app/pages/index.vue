@@ -147,9 +147,9 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
           <li><b class="c-cyan">1.</b> You get a random <b class="c-cyan">START</b> actor and a <b class="c-pink">TARGET</b> actor.</li>
           <li><b class="c-yellow">2.</b> Type a film the current actor was in.</li>
           <li><b class="c-yellow">3.</b> Type a co-star from that film to jump to them.</li>
-          <li><b class="c-green">4.</b> Keep hopping until you land on the target.</li>
+          <li><b class="c-green">4.</b> Keep hopping! Name a film the <b class="c-pink">TARGET</b> was in and the chain connects automatically.</li>
           <li><b class="c-pink">★</b> They've never shared a film, so you need at least one actor in between. Fewer films = higher score. 2 films = <b class="c-yellow">1000</b> pts!</li>
-          <li><b class="c-cyan">♥</b> <b class="c-cyan">CO-OP:</b> host a game, send the link, and take turns building one chain together.</li>
+          <li><b class="c-cyan">♥</b> <b class="c-cyan">CO-OP:</b> host a game, send the link, and build one chain together. Each turn you name a film <i>and</i> a co-star from it.</li>
           <li><b class="c-orange">?</b> Stuck? Hints cost {{ HINT_COST }} pts. Wrong guesses are free.</li>
         </ol>
       </div>

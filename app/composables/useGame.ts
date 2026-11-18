@@ -290,6 +290,12 @@ export function useGame() {
       listLoading.value = false
       sync()
     }
+
+    // Auto-connect: if the TARGET is in this film too, the chain is complete
+    const t = target.value
+    if (t && cast.value.some(a => a.id === t.id)) {
+      await chooseActor(cast.value.find(a => a.id === t.id)!, by)
+    }
   }
 
   async function chooseActor(actor: Actor, by: string) {
@@ -411,18 +417,22 @@ export function useGame() {
     if (status.value !== 'playing') return
     if (multiplayer.value && currentPlayer.value?.id !== by) return // not your turn
 
+    // One co-op turn = name a film AND a co-star from it; the turn passes once the co-star lands
+    const wasNamingActor = phase.value === 'cast'
+    const turnBefore = turn.value
+
     switch (action.type) {
       case 'guess': {
-        const ok = phase.value === 'film' ? await guessFilm(action.guess, by) : await guessActor(action.guess, by)
-        if (ok && status.value === 'playing') nextTurn()
+        const ok = wasNamingActor ? await guessActor(action.guess, by) : await guessFilm(action.guess, by)
+        if (ok && wasNamingActor && status.value === 'playing') nextTurn()
         break
       }
       case 'choose': {
         const item = choices.value.find(c => c.id === action.id)
         if (!item) break
-        if (phase.value === 'film') await chooseFilm(item as Film, by)
-        else await chooseActor(item as Actor, by)
-        if (status.value === 'playing') nextTurn()
+        if (wasNamingActor) await chooseActor(item as Actor, by)
+        else await chooseFilm(item as Film, by)
+        if (wasNamingActor && status.value === 'playing') nextTurn()
         break
       }
       case 'hint':
@@ -437,6 +447,10 @@ export function useGame() {
           say('info', `${nameOf(by)} passed. Over to ${currentPlayer.value?.name}!`)
         }
         break
+    }
+    // Turn just moved on after a co-star landed: tell everyone who's up
+    if (action.type !== 'pass' && turn.value !== turnBefore && players.value.length > 1 && feedback.value?.kind === 'good') {
+      feedback.value = { ...feedback.value, text: `${feedback.value.text} Over to ${currentPlayer.value?.name}!` }
     }
     sync()
   }
