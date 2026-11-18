@@ -29,9 +29,10 @@ Click **HOST A CO-OP GAME**, send the invite link (`…/actor-connect-game/?room
 and build **one chain together**, taking turns. Each correct film or co-star passes the turn on;
 wrong guesses keep the turn, and **PASS** hands it over if you're stuck. Friends can join mid-game.
 
-Players connect browser-to-browser (WebRTC via [PeerJS](https://peerjs.com)'s free public matchmaking server),
-so there's no backend. The **host's browser runs the game**, so the host must keep their tab open.
-On a few very strict work/school networks, direct connections can be blocked.
+Players talk through a free public MQTT message broker (HiveMQ, with EMQX as a fallback) over secure
+WebSockets, so it works across home wi-fi, mobile data and most work networks with no backend or accounts.
+The **host's browser runs the game**, so the host must keep their tab open. Room messages aren't secret
+(anyone with the room code could read them), which is fine for a game.
 
 Built with **Nuxt 4** (Vue 3 + SCSS). Film data comes from [TMDB](https://www.themoviedb.org), the same open
 database Letterboxd uses (IMDb and Letterboxd don't offer public APIs).
@@ -80,7 +81,7 @@ app/
   pages/index.vue             menu, lobby, game board, win screen
   composables/useGame.ts      game engine: chain, guess checking, hints, undo, scoring, co-op turns & sync
   utils/movieApi.ts           TMDB client (filmographies, casts, search, random fair pairs), cached per session
-  utils/net.ts                peer-to-peer lobbies (PeerJS): host runs the game, guests send moves
+  utils/net.ts                lobbies over public MQTT brokers: host runs the game, guests send moves
   utils/demoData.ts           offline demo film set (used when no token is set)
   components/GuessBox.vue     typing box + autocomplete
   components/ChainBoard.vue   the picture chain across the top (start → film → actor → … → target)

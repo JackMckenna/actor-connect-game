@@ -504,9 +504,7 @@ export function useGame() {
     }
     catch (e: any) {
       host = null
-      error.value = e?.type === 'browser-incompatible'
-        ? 'Your browser doesn\'t support multiplayer. Try Chrome, Edge, Firefox or Safari.'
-        : 'Could not create a lobby. Check your internet connection and try again.'
+      error.value = e?.message ?? 'Could not create a lobby. Check your internet connection and try again.'
       status.value = 'error'
     }
   }

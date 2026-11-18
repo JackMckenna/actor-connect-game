@@ -10,8 +10,8 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "mqtt": "^5.16.1",
     "nuxt": "^4.4.8",
-    "peerjs": "^1.5.5",
     "vue": "^3.5.45",
     "vue-router": "^5.5.1"
   },
